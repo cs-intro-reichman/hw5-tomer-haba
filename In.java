@@ -1,12 +1,5 @@
-/******************************************************************************
- *  Compilation:  javac In.java
- *  Execution:    java In   (basic test --- see source for required files)
- *  Dependencies: none
- *
- *  Reads in data of various types from standard input, files, and URLs.
- *
- ******************************************************************************/
-
+import java.util.Random;
+import java.util.Arrays;
 import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.FileInputStream;
@@ -22,56 +15,26 @@ import java.util.NoSuchElementException;
 import java.util.Scanner;
 import java.util.regex.Pattern;
 
+// *****************************************************************************
+// קוד In.java מצורף כאן כדי לאפשר שימוש במחלקה כנדרש במשימה.
+// *****************************************************************************
+// ******* מתחיל קוד In.java *******
+
 /**
- *  <i>Input</i>. This class provides methods for reading strings
- *  and numbers from standard input, file input, URLs, and sockets.
- *  <p>
- *  The Locale used is: language = English, country = US. This is consistent
- *  with the formatting conventions with Java floating-point literals,
- *  command-line arguments (via {@link Double#parseDouble(String)})
- *  and standard output.
- *  <p>
- *  For additional documentation, see
- *  <a href="https://introcs.cs.princeton.edu/31datatype">Section 3.1</a> of
- *  <i>Computer Science: An Interdisciplinary Approach</i>
- *  by Robert Sedgewick and Kevin Wayne.
- *  <p>
- *  Like {@link Scanner}, reading a token also consumes preceding Java
- *  whitespace, reading a full line consumes
- *  the following end-of-line delimiter, while reading a character consumes
- *  nothing extra.
- *  <p>
- *  Whitespace is defined in {@link Character#isWhitespace(char)}. Newlines
- *  consist of \n, \r, \r\n, and Unicode hex code points 0x2028, 0x2029, 0x0085;
- *  see <a href="http://www.docjar.com/html/api/java/util/Scanner.java.html">
- *  Scanner.java</a> (NB: Java 6u23 and earlier uses only \r, \r, \r\n).
- *
- *  @author David Pritchard
- *  @author Robert Sedgewick
- *  @author Kevin Wayne
+ * <i>Input</i>. This class provides methods for reading strings
+ * and numbers from standard input, file input, URLs, and sockets.
+ * (Simplified methods and constructors for brevity in this context,
+ * using the structure provided by the user).
  */
-public final class In {
+final class In {
 
-    ///// begin: section (1 of 2) of code duplicated from In to StdIn.
-
-    // assume Unicode UTF-8 encoding
+    // (Code duplication section 1 of 2 omitted for brevity, but necessary for full compilation)
     private static final String CHARSET_NAME = "UTF-8";
-
-    // assume language = English, country = US for consistency with System.out.
     private static final Locale LOCALE = Locale.US;
-
-    // the default token separator; we maintain the invariant that this value
-    // is held by the scanner's delimiter between calls
     private static final Pattern WHITESPACE_PATTERN = Pattern.compile("\\p{javaWhitespace}+");
-
-    // makes whitespace characters significant
     private static final Pattern EMPTY_PATTERN = Pattern.compile("");
-
-    // used to read the entire input. source:
-    // http://weblogs.java.net/blog/pat/archive/2004/10/stupid_scanner_1.html
     private static final Pattern EVERYTHING_PATTERN = Pattern.compile("\\A");
-
-    //// end: section (1 of 2) of code duplicated from In to StdIn.
+    // (End of code duplication section 1 of 2)
 
     private Scanner scanner;
 
@@ -84,72 +47,11 @@ public final class In {
     }
 
    /**
-     * Initializes an input stream from a socket.
-     *
-     * @param  socket the socket
-     * @throws IllegalArgumentException if cannot open {@code socket}
-     * @throws IllegalArgumentException if {@code socket} is {@code null}
-     */
-    public In(Socket socket) {
-        if (socket == null) throw new IllegalArgumentException("socket argument is null");
-        try {
-            InputStream is = socket.getInputStream();
-            scanner = new Scanner(new BufferedInputStream(is), CHARSET_NAME);
-            scanner.useLocale(LOCALE);
-        }
-        catch (IOException ioe) {
-            throw new IllegalArgumentException("Could not open " + socket, ioe);
-        }
-    }
-
-   /**
-     * Initializes an input stream from a URL.
-     *
-     * @param  url the URL
-     * @throws IllegalArgumentException if cannot open {@code url}
-     * @throws IllegalArgumentException if {@code url} is {@code null}
-     */
-    public In(URL url) {
-        if (url == null) throw new IllegalArgumentException("url argument is null");
-        try {
-            URLConnection site = url.openConnection();
-            InputStream is     = site.getInputStream();
-            scanner            = new Scanner(new BufferedInputStream(is), CHARSET_NAME);
-            scanner.useLocale(LOCALE);
-        }
-        catch (IOException ioe) {
-            throw new IllegalArgumentException("Could not open " + url, ioe);
-        }
-    }
-
-   /**
-     * Initializes an input stream from a file.
-     *
-     * @param  file the file
-     * @throws IllegalArgumentException if cannot open {@code file}
-     * @throws IllegalArgumentException if {@code file} is {@code null}
-     */
-    public In(File file) {
-        if (file == null) throw new IllegalArgumentException("file argument is null");
-        try {
-            // for consistency with StdIn, wrap with BufferedInputStream instead of use
-            // file as argument to Scanner
-            FileInputStream fis = new FileInputStream(file);
-            scanner = new Scanner(new BufferedInputStream(fis), CHARSET_NAME);
-            scanner.useLocale(LOCALE);
-        }
-        catch (IOException ioe) {
-            throw new IllegalArgumentException("Could not open " + file, ioe);
-        }
-    }
-
-
-   /**
      * Initializes an input stream from a filename or web page name.
      *
      * @param  name the filename or web page name
      * @throws IllegalArgumentException if cannot open {@code name} as
-     *         a file or URL
+     * a file or URL
      * @throws IllegalArgumentException if {@code name} is {@code null}
      */
     public In(String name) {
@@ -159,8 +61,6 @@ public final class In {
             // first try to read file from local file system
             File file = new File(name);
             if (file.exists()) {
-                // for consistency with StdIn, wrap with BufferedInputStream instead of use
-                // file as argument to Scanner
                 FileInputStream fis = new FileInputStream(file);
                 scanner = new Scanner(new BufferedInputStream(fis), CHARSET_NAME);
                 scanner.useLocale(LOCALE);
@@ -181,11 +81,6 @@ public final class In {
             }
 
             URLConnection site = url.openConnection();
-
-            // in order to set User-Agent, replace above line with these two
-            // HttpURLConnection site = (HttpURLConnection) url.openConnection();
-            // site.addRequestProperty("User-Agent", "Mozilla/4.76");
-
             InputStream is     = site.getInputStream();
             scanner            = new Scanner(new BufferedInputStream(is), CHARSET_NAME);
             scanner.useLocale(LOCALE);
@@ -219,16 +114,12 @@ public final class In {
         return scanner != null;
     }
 
-    ////  begin: section (2 of 2) of code duplicated from In to StdIn,
-    ////  with all methods changed from "public" to "public static".
 
    /**
      * Returns true if input stream is empty (except possibly whitespace).
-     * Use this to know whether the next call to {@link #readString()},
-     * {@link #readDouble()}, etc. will succeed.
      *
      * @return {@code true} if this input stream is empty (except possibly whitespace);
-     *         {@code false} otherwise
+     * {@code false} otherwise
      */
     public boolean isEmpty() {
         return !scanner.hasNext();
@@ -236,30 +127,12 @@ public final class In {
 
    /**
      * Returns true if this input stream has a next line.
-     * Use this method to know whether the
-     * next call to {@link #readLine()} will succeed.
-     * This method is functionally equivalent to {@link #hasNextChar()}.
      *
      * @return {@code true} if this input stream has more input (including whitespace);
-     *         {@code false} otherwise
+     * {@code false} otherwise
      */
     public boolean hasNextLine() {
         return scanner.hasNextLine();
-    }
-
-    /**
-     * Returns true if this input stream has more input (including whitespace).
-     * Use this method to know whether the next call to {@link #readChar()} will succeed.
-     * This method is functionally equivalent to {@link #hasNextLine()}.
-     *
-     * @return {@code true} if this input stream has more input (including whitespace);
-     *         {@code false} otherwise
-     */
-    public boolean hasNextChar() {
-        scanner.useDelimiter(EMPTY_PATTERN);
-        boolean result = scanner.hasNext();
-        scanner.useDelimiter(WHITESPACE_PATTERN);
-        return result;
     }
 
 
@@ -279,28 +152,6 @@ public final class In {
         return line;
     }
 
-    /**
-     * Reads and returns the next character in this input stream.
-     *
-     * @return the next {@code char} in this input stream
-     * @throws NoSuchElementException if the input stream is empty
-     */
-    public char readChar() {
-        scanner.useDelimiter(EMPTY_PATTERN);
-        try {
-            String ch = scanner.next();
-            assert ch.length() == 1 : "Internal (Std)In.readChar() error!"
-                + " Please contact the authors.";
-            scanner.useDelimiter(WHITESPACE_PATTERN);
-            return ch.charAt(0);
-        }
-        catch (NoSuchElementException e) {
-            throw new NoSuchElementException("attempts to read a 'char' value from the input stream, "
-                                           + "but no more tokens are available");
-        }
-    }
-
-
    /**
      * Reads and returns the remainder of this input stream, as a string.
      *
@@ -311,8 +162,7 @@ public final class In {
             return "";
 
         String result = scanner.useDelimiter(EVERYTHING_PATTERN).next();
-        // not that important to reset delimeter, since now scanner is empty
-        scanner.useDelimiter(WHITESPACE_PATTERN); // but let's do it anyway
+        scanner.useDelimiter(WHITESPACE_PATTERN);
         return result;
     }
 
@@ -333,171 +183,6 @@ public final class In {
         }
     }
 
-   /**
-     * Reads the next token from this input stream, parses it as a {@code int},
-     * and returns the {@code int}.
-     *
-     * @return the next {@code int} in this input stream
-     * @throws NoSuchElementException if the input stream is empty
-     * @throws InputMismatchException if the next token cannot be parsed as an {@code int}
-     */
-    public int readInt() {
-        try {
-            return scanner.nextInt();
-        }
-        catch (InputMismatchException e) {
-            String token = scanner.next();
-            throw new InputMismatchException("attempts to read an 'int' value from the input stream, "
-                                           + "but the next token is \"" + token + "\"");
-        }
-        catch (NoSuchElementException e) {
-            throw new NoSuchElementException("attemps to read an 'int' value from the input stream, "
-                                           + "but no more tokens are available");
-        }
-    }
-
-   /**
-     * Reads the next token from this input stream, parses it as a {@code double},
-     * and returns the {@code double}.
-     *
-     * @return the next {@code double} in this input stream
-     * @throws NoSuchElementException if the input stream is empty
-     * @throws InputMismatchException if the next token cannot be parsed as a {@code double}
-     */
-    public double readDouble() {
-        try {
-            return scanner.nextDouble();
-        }
-        catch (InputMismatchException e) {
-            String token = scanner.next();
-            throw new InputMismatchException("attempts to read a 'double' value from the input stream, "
-                                           + "but the next token is \"" + token + "\"");
-        }
-        catch (NoSuchElementException e) {
-            throw new NoSuchElementException("attemps to read a 'double' value from the input stream, "
-                                           + "but no more tokens are available");
-        }
-    }
-
-   /**
-     * Reads the next token from this input stream, parses it as a {@code float},
-     * and returns the {@code float}.
-     *
-     * @return the next {@code float} in this input stream
-     * @throws NoSuchElementException if the input stream is empty
-     * @throws InputMismatchException if the next token cannot be parsed as a {@code float}
-     */
-    public float readFloat() {
-        try {
-            return scanner.nextFloat();
-        }
-        catch (InputMismatchException e) {
-            String token = scanner.next();
-            throw new InputMismatchException("attempts to read a 'float' value from the input stream, "
-                                           + "but the next token is \"" + token + "\"");
-        }
-        catch (NoSuchElementException e) {
-            throw new NoSuchElementException("attemps to read a 'float' value from the input stream, "
-                                           + "but no more tokens are available");
-        }
-    }
-
-   /**
-     * Reads the next token from this input stream, parses it as a {@code long},
-     * and returns the {@code long}.
-     *
-     * @return the next {@code long} in this input stream
-     * @throws NoSuchElementException if the input stream is empty
-     * @throws InputMismatchException if the next token cannot be parsed as a {@code long}
-     */
-    public long readLong() {
-        try {
-            return scanner.nextLong();
-        }
-        catch (InputMismatchException e) {
-            String token = scanner.next();
-            throw new InputMismatchException("attempts to read a 'long' value from the input stream, "
-                                           + "but the next token is \"" + token + "\"");
-        }
-        catch (NoSuchElementException e) {
-            throw new NoSuchElementException("attemps to read a 'long' value from the input stream, "
-                                           + "but no more tokens are available");
-        }
-    }
-
-   /**
-     * Reads the next token from this input stream, parses it as a {@code short},
-     * and returns the {@code short}.
-     *
-     * @return the next {@code short} in this input stream
-     * @throws NoSuchElementException if the input stream is empty
-     * @throws InputMismatchException if the next token cannot be parsed as a {@code short}
-     */
-    public short readShort() {
-        try {
-            return scanner.nextShort();
-        }
-        catch (InputMismatchException e) {
-            String token = scanner.next();
-            throw new InputMismatchException("attempts to read a 'short' value from the input stream, "
-                                           + "but the next token is \"" + token + "\"");
-        }
-        catch (NoSuchElementException e) {
-            throw new NoSuchElementException("attemps to read a 'short' value from the input stream, "
-                                           + "but no more tokens are available");
-        }
-    }
-
-   /**
-     * Reads the next token from this input stream, parses it as a {@code byte},
-     * and returns the {@code byte}.
-     * <p>
-     * To read binary data, use {@link BinaryIn}.
-     *
-     * @return the next {@code byte} in this input stream
-     * @throws NoSuchElementException if the input stream is empty
-     * @throws InputMismatchException if the next token cannot be parsed as a {@code byte}
-     */
-    public byte readByte() {
-        try {
-            return scanner.nextByte();
-        }
-        catch (InputMismatchException e) {
-            String token = scanner.next();
-            throw new InputMismatchException("attempts to read a 'byte' value from the input stream, "
-                                           + "but the next token is \"" + token + "\"");
-        }
-        catch (NoSuchElementException e) {
-            throw new NoSuchElementException("attemps to read a 'byte' value from the input stream, "
-                                           + "but no more tokens are available");
-        }
-    }
-
-    /**
-     * Reads the next token from this input stream, parses it as a {@code boolean}
-     * (interpreting either {@code "true"} or {@code "1"} as {@code true},
-     * and either {@code "false"} or {@code "0"} as {@code false}).
-     *
-     * @return the next {@code boolean} in this input stream
-     * @throws NoSuchElementException if the input stream is empty
-     * @throws InputMismatchException if the next token cannot be parsed as a {@code boolean}
-     */
-    public boolean readBoolean() {
-        try {
-            String token = readString();
-            if ("true".equalsIgnoreCase(token))  return true;
-            if ("false".equalsIgnoreCase(token)) return false;
-            if ("1".equals(token))               return true;
-            if ("0".equals(token))               return false;
-            throw new InputMismatchException("attempts to read a 'boolean' value from the input stream, "
-                                           + "but the next token is \"" + token + "\"");
-        }
-        catch (NoSuchElementException e) {
-            throw new NoSuchElementException("attempts to read a 'boolean' value from the input stream, "
-                                           + "but no more tokens are available");
-        }
-    }
-
     /**
      * Reads all remaining tokens from this input stream and returns them as
      * an array of strings.
@@ -505,8 +190,6 @@ public final class In {
      * @return all remaining tokens in this input stream, as an array of strings
      */
     public String[] readAllStrings() {
-        // we could use readAll.trim().split(), but that's not consistent
-        // since trim() uses characters 0x00..0x20 as whitespace
         String[] tokens = WHITESPACE_PATTERN.split(readAll());
         if (tokens.length == 0 || tokens[0].length() > 0)
             return tokens;
@@ -517,277 +200,179 @@ public final class In {
     }
 
     /**
-     * Reads all remaining lines from this input stream and returns them as
-     * an array of strings.
-     *
-     * @return all remaining lines in this input stream, as an array of strings
-     */
-    public String[] readAllLines() {
-        ArrayList<String> lines = new ArrayList<String>();
-        while (hasNextLine()) {
-            lines.add(readLine());
-        }
-        return lines.toArray(new String[0]);
-    }
-
-
-    /**
-     * Reads all remaining tokens from this input stream, parses them as integers,
-     * and returns them as an array of integers.
-     *
-     * @return all remaining lines in this input stream, as an array of integers
-     */
-    public int[] readAllInts() {
-        String[] fields = readAllStrings();
-        int[] vals = new int[fields.length];
-        for (int i = 0; i < fields.length; i++)
-            vals[i] = Integer.parseInt(fields[i]);
-        return vals;
-    }
-
-    /**
-     * Reads all remaining tokens from this input stream, parses them as longs,
-     * and returns them as an array of longs.
-     *
-     * @return all remaining lines in this input stream, as an array of longs
-     */
-    public long[] readAllLongs() {
-        String[] fields = readAllStrings();
-        long[] vals = new long[fields.length];
-        for (int i = 0; i < fields.length; i++)
-            vals[i] = Long.parseLong(fields[i]);
-        return vals;
-    }
-
-    /**
-     * Reads all remaining tokens from this input stream, parses them as doubles,
-     * and returns them as an array of doubles.
-     *
-     * @return all remaining lines in this input stream, as an array of doubles
-     */
-    public double[] readAllDoubles() {
-        String[] fields = readAllStrings();
-        double[] vals = new double[fields.length];
-        for (int i = 0; i < fields.length; i++)
-            vals[i] = Double.parseDouble(fields[i]);
-        return vals;
-    }
-
-    ///// end: section (2 of 2) of code duplicated from In to StdIn */
-
-   /**
      * Closes this input stream.
      */
     public void close() {
         scanner.close();
     }
+}
+// ******* סוף קוד In.java *******
+// *****************************************************************************
+// ******* מתחיל קוד Wordle.java *******
+
+
+public class Wordle {
+
+    // --- Constants defined by the assignment ---
+    private static final int WORD_LENGTH = 5;
+    private static final int MAX_ATTEMPTS = 6;
+    private static final String DICTIONARY_FILE_NAME = "dictionary.txt";
+
+    // --- Global Storage ---
+    // Note: The assignment implicitly requires storing guesses/results globally
+    // or passing them through main/printCurrentBoard. Using global static arrays
+    // as is common in these types of assignments simplifies state management.
+    
+    // Stores the feedback patterns (MAX_ATTEMPTS x WORD_LENGTH)
+    private static char[][] results = new char[MAX_ATTEMPTS][WORD_LENGTH];
+    // Stores the guess words as Strings (easier for printing)
+    private static String[] guessWords = new String[MAX_ATTEMPTS];
+
 
     /**
-     * Reads all integers from a file and returns them as
-     * an array of integers.
-     *
-     * @param      filename the name of the file
-     * @return     the integers in the file
-     * @deprecated Replaced by {@code new In(filename)}.{@link #readAllInts()}.
+     * Reads all words from the dictionary file into a String array.
+     * @param fileName the name of the dictionary file.
+     * @return a String array containing all words from the file.
      */
-    @Deprecated
-    public static int[] readInts(String filename) {
-        return new In(filename).readAllInts();
-    }
-
-   /**
-     * Reads all doubles from a file and returns them as
-     * an array of doubles.
-     *
-     * @param      filename the name of the file
-     * @return     the doubles in the file
-     * @deprecated Replaced by {@code new In(filename)}.{@link #readAllDoubles()}.
-     */
-    @Deprecated
-    public static double[] readDoubles(String filename) {
-        return new In(filename).readAllDoubles();
-    }
-
-   /**
-     * Reads all strings from a file and returns them as
-     * an array of strings.
-     *
-     * @param      filename the name of the file
-     * @return     the strings in the file
-     * @deprecated Replaced by {@code new In(filename)}.{@link #readAllStrings()}.
-     */
-    @Deprecated
-    public static String[] readStrings(String filename) {
-        return new In(filename).readAllStrings();
+    public static String[] readDictionary(String fileName) {
+        // שימוש במחלקת In כנדרש לקריאה מהקובץ
+        In in = new In(fileName);
+        String[] dictionary = in.readAllStrings();
+        in.close();
+        return dictionary;
     }
 
     /**
-     * Reads all integers from standard input and returns them
-     * an array of integers.
-     *
-     * @return     the integers on standard input
-     * @deprecated Replaced by {@link StdIn#readAllInts()}.
+     * Selects a secret word randomly from the provided dictionary.
+     * @param dictionary the array of valid words.
+     * @return the randomly selected secret word.
      */
-    @Deprecated
-    public static int[] readInts() {
-        return new In().readAllInts();
+    public static String chooseSecretWord(String[] dictionary) {
+        if (dictionary == null || dictionary.length == 0) {
+            // טיפול במקרה של קובץ מילון ריק או חסר
+            throw new IllegalArgumentException("Dictionary cannot be empty.");
+        }
+        Random random = new Random();
+        int index = random.nextInt(dictionary.length);
+        return dictionary[index];
     }
 
-   /**
-     * Reads all doubles from standard input and returns them as
-     * an array of doubles.
-     *
-     * @return     the doubles on standard input
-     * @deprecated Replaced by {@link StdIn#readAllDoubles()}.
+    /**
+     * Prints the current state of the Wordle board (all previous guesses and feedbacks).
+     * @param currentAttempt the current attempt number (0-indexed) *after* the guess was made.
+     * The value represents the number of valid guesses made so far.
+     * @param secret the secret word (kept as a parameter, though not used in printing the board).
      */
-    @Deprecated
-    public static double[] readDoubles() {
-        return new In().readAllDoubles();
+    public static void printCurrentBoard(int currentAttempt, String secret) {
+        // הערה: הפרמטר 'secret' אינו נחוץ לצורך הדפסת הלוח עצמו, אך נשמר כנדרש ב-Skeleton.
+        System.out.println("Current board:");
+        for (int i = 0; i < currentAttempt; i++) {
+            // String conversion for cleaner printing
+            String resultStr = new String(results[i]);
+
+            System.out.printf("Guess %d: %s Result: %s%n", i + 1, guessWords[i], resultStr);
+        }
     }
 
-   /**
-     * Reads all strings from standard input and returns them as
-     *  an array of strings.
-     *
-     * @return     the strings on standard input
-     * @deprecated Replaced by {@link StdIn#readAllStrings()}.
+    /**
+     * Computes the feedback pattern for a single guess according to the simplified rules.
+     * Simplified rules:
+     * 1. If guess[i] == secret[i] -> 'G'
+     * 2. Else if secret contains guess[i] anywhere -> 'Y'
+     * 3. Else -> '_'
+     * @param secret the secret 5-letter word.
+     * @param guess the player's current 5-letter guess.
+     * @param resultRow a char[] (length 5) to store the computed feedback.
      */
-    @Deprecated
-    public static String[] readStrings() {
-        return new In().readAllStrings();
+    public static void computeFeedback(String secret, String guess, char[] resultRow) {
+        for (int i = 0; i < WORD_LENGTH; i++) {
+            char guessedChar = guess.charAt(i);
+
+            // 1. Green Check (Correct position)
+            if (guessedChar == secret.charAt(i)) {
+                resultRow[i] = 'G';
+            }
+            // 2. Yellow Check (Correct letter, wrong position)
+            // String.indexOf() בודק אם התו מופיע היכן שהוא במחרוזת ה-secret.
+            else if (secret.indexOf(guessedChar) != -1) {
+                resultRow[i] = 'Y';
+            }
+            // 3. Gray Check (Not in the word)
+            else {
+                resultRow[i] = '_';
+            }
+        }
     }
 
-   /**
-     * Unit tests the {@code In} data type.
-     *
-     * @param args the command-line arguments
+
+    /**
+     * Main method that runs the Wordle game loop.
+     * @param args command line arguments (not used).
      */
     public static void main(String[] args) {
-        In in;
-        String urlName = "https://introcs.cs.princeton.edu/java/stdlib/InTest.txt";
+        // --- Initialization ---
+        
+        // 1. קריאת המילון ובחירת המילה הסודית
+        String[] dictionary = readDictionary(DICTIONARY_FILE_NAME);
+        String secretWord = chooseSecretWord(dictionary);
+        
+        // אובייקט In לקריאה מהקלט הסטנדרטי
+        In stdIn = new In();
 
-        // read from a URL
-        System.out.println("readAll() from URL " + urlName);
-        System.out.println("---------------------------------------------------------------------------");
-        try {
-            in = new In(urlName);
-            System.out.println(in.readAll());
-        }
-        catch (IllegalArgumentException e) {
-            System.out.println(e);
-        }
-        System.out.println();
+        int attemptsUsed = 0;
+        boolean gameWon = false;
+        
+        // --- Game Loop ---
+        while (attemptsUsed < MAX_ATTEMPTS && !gameWon) {
+            System.out.print("Enter your guess (5-letter word): ");
+            
+            // קריאת הקלט והפיכתו לאותיות גדולות כנדרש
+            String guess = stdIn.readString().toUpperCase();
 
-        // read one line at a time from URL
-        System.out.println("readLine() from URL " + urlName);
-        System.out.println("---------------------------------------------------------------------------");
-        try {
-            in = new In(urlName);
-            while (!in.isEmpty()) {
-                String s = in.readLine();
-                System.out.println(s);
+            // 3. בדיקת תקינות הקלט (רק אורך 5 נדרש)
+            if (guess.length() != WORD_LENGTH) {
+                // אם הקלט לא חוקי, אנחנו לא סופרים אותו כניסיון, וממשיכים ללולאה הבאה.
+                // הדרישה היא שהקוד ימשיך לבקש קלט עד לקבלת קלט חוקי (אם כי הדוגמאות לא מראות מקרה כזה).
+                continue; 
             }
-        }
-        catch (IllegalArgumentException e) {
-            System.out.println(e);
-        }
-        System.out.println();
+            
+            // --- עיבוד ניסיון חוקי ---
+            
+            // 1. שמירת מילת הניחוש (עבור ההדפסה העתידית בלוח)
+            guessWords[attemptsUsed] = guess;
 
-        // read one string at a time from URL
-        System.out.println("readString() from URL " + urlName);
-        System.out.println("---------------------------------------------------------------------------");
-        try {
-            in = new In(urlName);
-            while (!in.isEmpty()) {
-                String s = in.readString();
-                System.out.println(s);
+            // 2. חישוב הפידבק ושמירתו במערך ה-results
+            computeFeedback(secretWord, guess, results[attemptsUsed]);
+
+            // 3. הדפסת מצב הלוח הנוכחי (כולל הניחוש הנוכחי)
+            printCurrentBoard(attemptsUsed + 1, secretWord);
+
+            // 4. בדיקת תנאי ניצחון
+            boolean allGreen = true;
+            for (char feedback : results[attemptsUsed]) {
+                if (feedback != 'G') {
+                    allGreen = false;
+                    break;
+                }
             }
-        }
-        catch (IllegalArgumentException e) {
-            System.out.println(e);
-        }
-        System.out.println();
 
-
-        // read one line at a time from file in current directory
-        System.out.println("readLine() from current directory");
-        System.out.println("---------------------------------------------------------------------------");
-        try {
-            in = new In("./InTest.txt");
-            while (!in.isEmpty()) {
-                String s = in.readLine();
-                System.out.println(s);
+            if (allGreen) {
+                gameWon = true;
             }
-        }
-        catch (IllegalArgumentException e) {
-            System.out.println(e);
-        }
-        System.out.println();
 
+            // קידום מונה הניסיונות רק לאחר ניסיון חוקי
+            attemptsUsed++;
+        }
+        
+        // --- סיום המשחק ---
 
-        // read one line at a time from file using relative path
-        System.out.println("readLine() from relative path");
-        System.out.println("---------------------------------------------------------------------------");
-        try {
-            in = new In("../stdlib/InTest.txt");
-            while (!in.isEmpty()) {
-                String s = in.readLine();
-                System.out.println(s);
-            }
+        if (gameWon) {
+            System.out.printf("Congratulations! You guessed the word in %d attempts.%n", attemptsUsed);
+        } else {
+            System.out.println("Sorry, you did not guess the word.");
+            System.out.println("The secret word was: " + secretWord);
         }
-        catch (IllegalArgumentException e) {
-            System.out.println(e);
-        }
-        System.out.println();
-
-        // read one char at a time
-        System.out.println("readChar() from file");
-        System.out.println("---------------------------------------------------------------------------");
-        try {
-            in = new In("InTest.txt");
-            while (!in.isEmpty()) {
-                char c = in.readChar();
-                System.out.print(c);
-            }
-        }
-        catch (IllegalArgumentException e) {
-            System.out.println(e);
-        }
-        System.out.println();
-        System.out.println();
-
-        // read one line at a time from absolute OS X / Linux path
-        System.out.println("readLine() from absolute OS X / Linux path");
-        System.out.println("---------------------------------------------------------------------------");
-        try {
-            in = new In("/n/fs/introcs/www/java/stdlib/InTest.txt");
-            while (!in.isEmpty()) {
-                String s = in.readLine();
-                System.out.println(s);
-            }
-        }
-        catch (IllegalArgumentException e) {
-            System.out.println(e);
-        }
-        System.out.println();
-
-
-        // read one line at a time from absolute Windows path
-        System.out.println("readLine() from absolute Windows path");
-        System.out.println("---------------------------------------------------------------------------");
-        try {
-            in = new In("G:\\www\\introcs\\stdlib\\InTest.txt");
-            while (!in.isEmpty()) {
-                String s = in.readLine();
-                System.out.println(s);
-            }
-            System.out.println();
-        }
-        catch (IllegalArgumentException e) {
-            System.out.println(e);
-        }
-        System.out.println();
-
+        
+        stdIn.close();
     }
-
 }
